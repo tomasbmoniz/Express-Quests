@@ -17,6 +17,8 @@ app.get("/", welcome);
 const movieHandlers = require("./movieHandlers");
 const userHandlers = require("./userHandlers");
 
+// the public routes
+
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
@@ -33,16 +35,31 @@ app.listen(port, (err) => {
   }
 });
 
-const { hashPassword } = require("./auth.js");
+const { hashPassword, verifyPassword, verifyToken } = require("./auth.js");
+// the public routes
+app.get("/api/movies", movieHandlers.getMovies);
+app.get("/api/movies/:id", movieHandlers.getMovieById);
 
+app.get("/api/users", userHandlers.getUser);
+app.get("/api/users/:id", userHandlers.getUserById);
+
+app.post(
+  "/api/login",
+  userHandlers.getUserByEmailWithPasswordAndPassToNext,
+  verifyPassword
+);
 app.post("/api/users", hashPassword, userHandlers.postUser);
+
+// routes to protect
+app.use(verifyToken);
+
 app.put("/api/users/:id", hashPassword, userHandlers.updateUser);
 
 app.post("/api/movies", movieHandlers.postMovie);
-// app.post("/api/users", usersHandler.postUser); replaced by the one above (hashPassword)
 
 app.put("/api/movies/:id", movieHandlers.updateMovie);
-// app.put("/api/users/:id", usersHandler.updateUser);
 
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 app.delete("/api/users/:id", userHandlers.deleteUser);
+
+app.post("/api/movies", movieHandlers.postMovie);
